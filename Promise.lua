@@ -53,26 +53,38 @@ end
 
 function Promise.andThen<T, U>(self: Exports.Promise<T>, callback: (T) -> U): Exports.Promise<U>
 	local d = Private[self]
-
-	return Promise.new(function(resolve: (U) -> (), reject: (any) -> ())
+	
+	local newPromise = Promise.new(function(resolve: (U) -> (), reject: (any) -> ())
 		table.insert(d.SuccessCallbacks, function(value: T)
-			local success, result = pcall(callback, value)
+			local success, result: U = pcall(callback, value)
 			if success then resolve(result) else reject(result) end
 		end)
 		table.insert(d.ErrorCallbacks, reject)
 	end)
+
+	return newPromise :: U
 end
 
-function Promise.catch<T, U>(self: Exports.Promise<T>, callback: (any) -> U): Exports.Promise<T | U>
+function Promise.catch<T>(self: Exports.Promise<T>, callback: (Exports.Error) -> ()): Exports.Promise<T>
 	local d = Private[self]
 
-	return Promise.new(function(resolve: (T | U) -> (), reject: (any) -> ())
-		table.insert(d.ErrorCallbacks, function(err: any)
+	return Promise.new(function(resolve: (T) -> (), reject: (any) -> ())
+		table.insert(d.ErrorCallbacks, function(err: Exports.Error)
 			local success, result = pcall(callback, err)
 			if success then resolve(result) else reject(result) end
 		end)
 		table.insert(d.SuccessCallbacks, resolve)
 	end)
 end
+
+local p = Promise.new(function(resolve, reject)
+	task.wait(1)
+	resolve(4)
+end):andThen(function(randomnumeralplaceholder)
+	return randomnumeralplaceholder
+end):andThen(function(randomnumeralplaceholder) -- this andThen() method doesnt show up. however, catch seems to show up in the type definition now (since it just returns Promice<T> back and just uses the callback)
+	return randomnumeralplaceholder
+end)
+
 
 return Promise
