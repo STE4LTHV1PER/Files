@@ -82,7 +82,7 @@ local p = Promise.new(function(resolve, reject)
 	resolve(4)
 end):andThen(function(randomnumeralplaceholder)
 	return randomnumeralplaceholder
-end):andThen(function(randomnumeralplaceholder) -- this andThen() method doesnt show up. however, catch seems to show up in the type definition now (since it just returns Promice<T> back and just uses the callback)
+end):andThen(function(randomnumeralplaceholder) -- this andThen() method doesnt show up. however, catch seems to show up in the type definition now (since it just returns Promise<T> back and just uses the callback)
 	return randomnumeralplaceholder
 end)
 
