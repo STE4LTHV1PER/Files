@@ -1,6 +1,9 @@
 export type PromiseOptions = {
 	
-	cancellable: boolean?,
+	timeout: boolean?,
+	delay: number?,
+	retries: number?,
+	errorMessage: string?,
 	
 }
 
@@ -10,10 +13,10 @@ export type ErrorTypes = "ValidationError" | "RuntimeError" | "CancelledError" |
 
 export type Error = {
 	
-	type: ErrorTypes,
+	errType: ErrorTypes,
+	status: PromiseStatus,
 	message: string?,
 	trace: string?,
-	context: string?,
 	
 }
 
@@ -27,11 +30,14 @@ export type Executor<T> = (
 export type PromiseInternal<T> = {
 	
 	Status: PromiseStatus,
+	StartTime: number,
 	Value: T?,
 	Error: any,
 	Cancelled: boolean,
+	TimedOut: boolean,
 	SuccessCallbacks: { (T) -> () },
 	ErrorCallbacks: { (any) -> () },
+	FinallyCallbacks: { (T) -> () },
 	
 }
 
@@ -39,6 +45,8 @@ export type Promise<T> = {
 	
 	andThen: <U>(self: Promise<T>, callback: (T) -> U) -> Promise<U>,
 	catch: (self: Promise<T>, callback: (Error) -> ()) -> Promise<T>,
+	finally: (self: Promise<T>, callback: (T) -> ()) -> Promise<T>,
+	cancel: (self: Promise<T>, callback: () -> ()) -> (),
 	
 }
 
